@@ -206,7 +206,7 @@
             <InfoBar
                 IsOpen="True"
                 IsClosable="False"
-                Severity="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={x:Null}}"
+                Severity="Informational"
                 Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
 
             <!-- DATA ENTRY & CASH FLOW LIST SECTION -->
@@ -302,13 +302,14 @@
                                     <!-- Flow Type Combo -->
                                     <ComboBox
                                         Grid.Column="1"
-                                        SelectedItem="{x:Bind FlowType, Mode=TwoWay}"
+                                        SelectedValue="{x:Bind FlowType, Mode=TwoWay}"
+                                        SelectedValuePath="Tag"
                                         HorizontalAlignment="Stretch"
                                         SelectionChanged="OnCashFlowValueChanged">
-                                        <models:FlowType>PremiumOutflow</models:FlowType>
-                                        <models:FlowType>TopUp</models:FlowType>
-                                        <models:FlowType>PartialWithdrawal</models:FlowType>
-                                        <models:FlowType>FinalMaturity</models:FlowType>
+                                        <ComboBoxItem Content="Premium Outflow" Tag="{x:Bind models:FlowType.PremiumOutflow}" />
+                                        <ComboBoxItem Content="Top-up Outflow" Tag="{x:Bind models:FlowType.TopUp}" />
+                                        <ComboBoxItem Content="Partial Withdrawal" Tag="{x:Bind models:FlowType.PartialWithdrawal}" />
+                                        <ComboBoxItem Content="Final Maturity" Tag="{x:Bind models:FlowType.FinalMaturity}" />
                                     </ComboBox>
 
                                     <!-- Amount NumberBox -->
