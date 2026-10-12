@@ -38,9 +38,13 @@ jobs:
         run: |
           dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal
 
-      - name: Publish WinUI 3 Application (.exe standalone)
+      - name: Restore NuGet Packages for Solution
         run: |
-          dotnet publish src/FinPulse/FinPulse.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64 -o publish/win-x64
+          nuget restore FinPulse.sln
+
+      - name: Publish WinUI 3 Application via MSBuild
+        run: |
+          msbuild src\FinPulse\FinPulse.csproj /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:PublishDir=..\..\publish\win-x64\ /t:Publish /v:detailed
 
       - name: Generate Code Signing Certificate (GitHub Secret or Self-Signed Timestamped)
         shell: powershell
