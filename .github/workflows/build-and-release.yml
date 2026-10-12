@@ -32,7 +32,7 @@ jobs:
 
       - name: Install WiX Toolset for .MSI Generation
         run: |
-          dotnet tool install --global wix --version 4.0.5
+          dotnet tool install --global wix --version 5.0.2
 
       - name: Run Financial Mathematics Unit Tests
         run: |
