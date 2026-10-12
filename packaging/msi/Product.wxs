@@ -13,7 +13,7 @@
     </StandardDirectory>
 
     <ComponentGroup Id="ProductFilesComponentGroup" Directory="INSTALLFOLDER">
-      <Files Include="publish\win-x64\**" />
+      <Files Include="..\..\publish\win-x64\**" />
     </ComponentGroup>
 
     <StandardDirectory Id="ProgramMenuFolder">
