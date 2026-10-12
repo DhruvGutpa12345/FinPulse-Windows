@@ -26,7 +26,7 @@ public partial class App : Application
     {
         // Core Mathematical & Infrastructure Services
         services.AddSingleton<IXirrCalculator, XirrCalculator>();
-        services.AddSingleton<IExportService, ExportService>();
+        services.AddSingleton<IExportService, WindowsExportService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
