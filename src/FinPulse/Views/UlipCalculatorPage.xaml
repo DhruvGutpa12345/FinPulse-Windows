@@ -155,7 +155,7 @@
                         <TextBlock
                             Text="{x:Bind ViewModel.Summary.AbsoluteReturnPercentage, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
                             Style="{ThemeResource CaptionTextBlockStyle}"
-                            Foreground="{ThemeResource SystemAccentColorLight1}"
+                            Foreground="{ThemeResource SystemControlHighlightAccentBrush}"
                             FontWeight="SemiBold" />
                     </StackPanel>
                 </Border>
@@ -163,7 +163,7 @@
                 <!-- Annualized XIRR Hero Badge Card -->
                 <Border
                     Grid.Column="3"
-                    Background="{ThemeResource SystemAccentColorLight3}"
+                    Background="{ThemeResource SystemControlHighlightListAccentLowBrush}"
                     BorderBrush="{ThemeResource SystemAccentColor}"
                     BorderThickness="1.5"
                     CornerRadius="8"
@@ -178,17 +178,17 @@
                             <TextBlock
                                 Text="ANNUALIZED RETURN (XIRR)"
                                 Style="{ThemeResource CaptionTextBlockStyle}"
-                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                Foreground="{ThemeResource SystemAccentColor}"
                                 FontWeight="Bold" />
                             <TextBlock
                                 Text="{x:Bind ViewModel.Summary.XirrPercentage, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
                                 FontSize="32"
                                 FontWeight="ExtraBold"
-                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                             <TextBlock
                                 Text="{x:Bind ViewModel.Summary.ConvergenceMethod, Mode=OneWay}"
                                 Style="{ThemeResource CaptionTextBlockStyle}"
-                                Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}" />
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
 
                         <FontIcon
@@ -196,7 +196,7 @@
                             Glyph="&#xE9D9;"
                             FontSize="36"
                             VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}"
+                            Foreground="{ThemeResource SystemAccentColor}"
                             Opacity="0.8" />
                     </Grid>
                 </Border>
@@ -302,14 +302,13 @@
                                     <!-- Flow Type Combo -->
                                     <ComboBox
                                         Grid.Column="1"
-                                        SelectedValue="{x:Bind FlowType, Mode=TwoWay}"
-                                        SelectedValuePath="Tag"
                                         HorizontalAlignment="Stretch"
-                                        SelectionChanged="OnCashFlowValueChanged">
-                                        <ComboBoxItem Content="Premium Outflow" Tag="{x:Bind models:FlowType.PremiumOutflow}" />
-                                        <ComboBoxItem Content="Top-up Outflow" Tag="{x:Bind models:FlowType.TopUp}" />
-                                        <ComboBoxItem Content="Partial Withdrawal" Tag="{x:Bind models:FlowType.PartialWithdrawal}" />
-                                        <ComboBoxItem Content="Final Maturity" Tag="{x:Bind models:FlowType.FinalMaturity}" />
+                                        Loaded="OnFlowTypeComboLoaded"
+                                        SelectionChanged="OnFlowTypeComboSelectionChanged">
+                                        <ComboBoxItem Content="Premium Outflow" Tag="PremiumOutflow" />
+                                        <ComboBoxItem Content="Top-up Outflow" Tag="TopUp" />
+                                        <ComboBoxItem Content="Partial Withdrawal" Tag="PartialWithdrawal" />
+                                        <ComboBoxItem Content="Final Maturity" Tag="FinalMaturity" />
                                     </ComboBox>
 
                                     <!-- Amount NumberBox -->
