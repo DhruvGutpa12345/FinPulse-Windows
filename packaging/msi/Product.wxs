@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v5/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="FinPulse Windows"
            Manufacturer="Dhruv Gupta"
            Version="1.0.0"
