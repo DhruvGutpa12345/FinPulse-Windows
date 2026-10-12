@@ -73,8 +73,7 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Path "dist" -Force
-          wix extension add WixToolset.UI.wixext
-          wix build -arch x64 -o dist/FinPulse-Setup-x64.msi -ext WixToolset.UI.wixext packaging/msi/Product.wxs -b publish/win-x64
+          wix build -arch x64 -o dist/FinPulse-Setup-x64.msi packaging/msi/Product.wxs -b publish/win-x64
 
       - name: Sign MSI Installer Package
         shell: powershell
