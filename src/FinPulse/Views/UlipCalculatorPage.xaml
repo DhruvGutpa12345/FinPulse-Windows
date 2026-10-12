@@ -361,8 +361,8 @@
                     Height="380">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
-                            <RowDefinition Width="Auto" />
-                            <RowDefinition Width="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Spacing="2">
@@ -389,8 +389,8 @@
                     Height="380">
                     <Grid RowSpacing="12">
                         <Grid.RowDefinitions>
-                            <RowDefinition Width="Auto" />
-                            <RowDefinition Width="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Spacing="2">
