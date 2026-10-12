@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Financial Mathematics Unit Tests
         run: |
-          dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal -p:Platform=x64
+          dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal
 
       - name: Publish WinUI 3 Application (.exe standalone)
         run: |
