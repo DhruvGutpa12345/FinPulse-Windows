@@ -1,0 +1,88 @@
+<UserControl
+    x:Class="FinPulse.Views.Dialogs.QuickGeneratorDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:FinPulse.Models"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="16" Width="380">
+        <TextBlock
+            Text="Quick Policy / Recurring Investment Prefill"
+            Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+        <TextBlock
+            Text="Generate multiple structured installments and optional maturity payout with a single click."
+            TextWrapping="Wrap"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Style="{ThemeResource CaptionTextBlockStyle}" />
+
+        <!-- Start Date -->
+        <CalendarDatePicker
+            x:Name="StartDatePicker"
+            Header="Initial Payment Date"
+            HorizontalAlignment="Stretch" />
+
+        <!-- Installment Amount -->
+        <NumberBox
+            x:Name="AmountNumberBox"
+            Header="Installment Premium Amount (₹ / $)"
+            Value="100000"
+            SpinButtonPlacementMode="Inline"
+            SmallChange="10000"
+            LargeChange="50000"
+            HorizontalAlignment="Stretch" />
+
+        <!-- Number of Installments -->
+        <NumberBox
+            x:Name="InstallmentsNumberBox"
+            Header="Number of Installments / Premium Paying Term"
+            Value="10"
+            SpinButtonPlacementMode="Inline"
+            SmallChange="1"
+            LargeChange="5"
+            Minimum="1"
+            Maximum="50"
+            HorizontalAlignment="Stretch" />
+
+        <!-- Frequency -->
+        <ComboBox
+            x:Name="FrequencyComboBox"
+            Header="Frequency"
+            HorizontalAlignment="Stretch"
+            SelectedIndex="0">
+            <ComboBoxItem Content="Annual (Every 1 Year)" Tag="Annual" />
+            <ComboBoxItem Content="Semi-Annual (Every 6 Months)" Tag="SemiAnnual" />
+            <ComboBoxItem Content="Quarterly (Every 3 Months)" Tag="Quarterly" />
+            <ComboBoxItem Content="Monthly (Every 1 Month)" Tag="Monthly" />
+        </ComboBox>
+
+        <!-- Projected Maturity -->
+        <CheckBox
+            x:Name="IncludeMaturityCheckBox"
+            Content="Include Projected Final Maturity"
+            IsChecked="True" />
+
+        <StackPanel
+            x:Name="MaturityDetailsPanel"
+            Spacing="12"
+            Margin="24,0,0,0">
+            <NumberBox
+                x:Name="MaturityYearsNumberBox"
+                Header="Policy Term / Maturity (Years after Start)"
+                Value="15"
+                Minimum="1"
+                Maximum="100"
+                HorizontalAlignment="Stretch" />
+
+            <NumberBox
+                x:Name="MaturityAmountNumberBox"
+                Header="Projected Maturity Payout Amount (₹ / $)"
+                Value="2200000"
+                SpinButtonPlacementMode="Inline"
+                SmallChange="100000"
+                HorizontalAlignment="Stretch" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

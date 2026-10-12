@@ -1,0 +1,64 @@
+# Build and Release Folders
+bin/
+obj/
+artifacts/
+publish/
+dist/
+TestResults/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+.vscode/
+
+# Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+ARM64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.assets.json
+
+# MSI / MSIX / Windows App SDK output
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.wixobj
+*.wixpdb
+*.msi
+
+# Certificates & Signing Keys
+*.pfx
+*.cer
+*.p12
+*.snk
+*.key
+
+# OS Generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

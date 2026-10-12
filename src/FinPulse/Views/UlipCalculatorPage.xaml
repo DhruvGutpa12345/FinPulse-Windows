@@ -1,0 +1,412 @@
+<Page
+    x:Class="FinPulse.Views.UlipCalculatorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:models="using:FinPulse.Models"
+    xmlns:converters="using:FinPulse.Common.Converters"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:CurrencyFormatterConverter x:Key="CurrencyConverter" />
+        <converters:PercentageFormatterConverter x:Key="PercentageConverter" />
+        <converters:FlowTypeToBrushConverter x:Key="FlowTypeBrushConverter" />
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="24" Padding="24,16,24,32" MaxWidth="1400">
+
+            <!-- PAGE HEADER & ACTION TOOLBAR -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock
+                        Text="ULIP &amp; Irregular Cash Flow (XIRR) Analyzer"
+                        Style="{ThemeResource TitleTextBlockStyle}"
+                        FontWeight="SemiBold" />
+                    <TextBlock
+                        Text="Accurately analyze multi-year ULIPs, structured endowment policies, top-ups, partial withdrawals, and surrender values using analytical Newton-Raphson &amp; Brent's root-finding."
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+
+                <!-- Action Toolbar -->
+                <CommandBar
+                    Grid.Column="1"
+                    DefaultLabelPosition="Right"
+                    Background="Transparent"
+                    IsOpen="False">
+                    <AppBarButton
+                        Icon="Play"
+                        Label="Quick Prefill"
+                        ToolTipService.ToolTip="Prefill recurring policy payments"
+                        Click="OnQuickPrefillClicked" />
+                    <AppBarButton
+                        Icon="Copy"
+                        Label="Copy Summary"
+                        ToolTipService.ToolTip="Copy summary KPIs to clipboard"
+                        Command="{x:Bind ViewModel.CopySummaryCommand}" />
+                    <AppBarButton
+                        Icon="Share"
+                        Label="Export CSV"
+                        ToolTipService.ToolTip="Export cash flows as CSV"
+                        Command="{x:Bind ViewModel.ExportCsvCommand}" />
+                    <AppBarSeparator />
+                    <AppBarButton
+                        Icon="Refresh"
+                        Label="Reset Sample"
+                        ToolTipService.ToolTip="Reset with standard 10-year policy"
+                        Command="{x:Bind ViewModel.ResetSampleCommand}" />
+                </CommandBar>
+            </Grid>
+
+            <!-- KPI SUMMARY METRIC CARDS -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.2*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Invested Card -->
+                <Border
+                    Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8D8;" FontSize="14" Foreground="#EF4444" />
+                            <TextBlock
+                                Text="TOTAL INVESTED (OUTFLOW)"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Summary.TotalInvested, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold" />
+                        <TextBlock
+                            Text="Net capital deposited"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Total Realized Card -->
+                <Border
+                    Grid.Column="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8E5;" FontSize="14" Foreground="#10B981" />
+                            <TextBlock
+                                Text="TOTAL REALIZED (INFLOW)"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Summary.TotalRealized, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold" />
+                        <TextBlock
+                            Text="Maturity &amp; partial payouts"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Absolute Profit Card -->
+                <Border
+                    Grid.Column="2"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="#3B82F6" />
+                            <TextBlock
+                                Text="NET GAIN / ABSOLUTE RETURN"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Summary.NetProfit, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Summary.AbsoluteReturnPercentage, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource SystemAccentColorLight1}"
+                            FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Annualized XIRR Hero Badge Card -->
+                <Border
+                    Grid.Column="3"
+                    Background="{ThemeResource SystemAccentColorLight3}"
+                    BorderBrush="{ThemeResource SystemAccentColor}"
+                    BorderThickness="1.5"
+                    CornerRadius="8"
+                    Padding="20,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock
+                                Text="ANNUALIZED RETURN (XIRR)"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                FontWeight="Bold" />
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Summary.XirrPercentage, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
+                                FontSize="32"
+                                FontWeight="ExtraBold"
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Summary.ConvergenceMethod, Mode=OneWay}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <FontIcon
+                            Grid.Column="1"
+                            Glyph="&#xE9D9;"
+                            FontSize="36"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}"
+                            Opacity="0.8" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- STATUS INFO BAR -->
+            <InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={x:Null}}"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+
+            <!-- DATA ENTRY & CASH FLOW LIST SECTION -->
+            <Border
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16">
+                <StackPanel Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock
+                                Text="Policy Cash Flows Schedule"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                FontWeight="SemiBold" />
+                            <TextBlock
+                                Text="Enter irregular premiums, top-ups, partial withdrawals, and maturity amounts with exact transaction dates."
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <!-- Add Row Buttons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Command="{x:Bind ViewModel.AddTransactionCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE710;" FontSize="12" />
+                                    <TextBlock Text="Add Premium Outflow" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.AddMaturityPayoutCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE8E5;" FontSize="12" />
+                                    <TextBlock Text="Add Maturity Inflow" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ClearAllCommand}">
+                                <FontIcon Glyph="&#xE74D;" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Table Header -->
+                    <Grid
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        Padding="12,8"
+                        CornerRadius="4"
+                        ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="50" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Transaction Date" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="1" Text="Type" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="2" Text="Amount (₹ / $)" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="3" Text="Notes / Description" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="4" Text="" />
+                    </Grid>
+
+                    <!-- Items ListView -->
+                    <ListView
+                        ItemsSource="{x:Bind ViewModel.CashFlows, Mode=OneWay}"
+                        SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:CashFlowItem">
+                                <Grid Margin="0,4" ColumnSpacing="12" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Date Picker -->
+                                    <CalendarDatePicker
+                                        Grid.Column="0"
+                                        Date="{x:Bind Date, Mode=TwoWay}"
+                                        HorizontalAlignment="Stretch"
+                                        DateChanged="OnCashFlowValueChanged" />
+
+                                    <!-- Flow Type Combo -->
+                                    <ComboBox
+                                        Grid.Column="1"
+                                        SelectedItem="{x:Bind FlowType, Mode=TwoWay}"
+                                        HorizontalAlignment="Stretch"
+                                        SelectionChanged="OnCashFlowValueChanged">
+                                        <models:FlowType>PremiumOutflow</models:FlowType>
+                                        <models:FlowType>TopUp</models:FlowType>
+                                        <models:FlowType>PartialWithdrawal</models:FlowType>
+                                        <models:FlowType>FinalMaturity</models:FlowType>
+                                    </ComboBox>
+
+                                    <!-- Amount NumberBox -->
+                                    <NumberBox
+                                        Grid.Column="2"
+                                        Value="{x:Bind Amount, Mode=TwoWay}"
+                                        SpinButtonPlacementMode="Compact"
+                                        SmallChange="10000"
+                                        HorizontalAlignment="Stretch"
+                                        ValueChanged="OnCashFlowValueChanged" />
+
+                                    <!-- Description / Notes -->
+                                    <TextBox
+                                        Grid.Column="3"
+                                        Text="{x:Bind Notes, Mode=TwoWay}"
+                                        PlaceholderText="e.g. Year 1 Premium"
+                                        HorizontalAlignment="Stretch" />
+
+                                    <!-- Delete Button -->
+                                    <Button
+                                        Grid.Column="4"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ToolTipService.ToolTip="Delete transaction"
+                                        Click="OnDeleteRowClicked">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="#EF4444" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
+            <!-- INTERACTIVE CHARTS & VISUALIZATIONS SECTION -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Chart 1: Cash Flow Timeline Bar Chart -->
+                <Border
+                    Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Height="380">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Width="Auto" />
+                            <RowDefinition Width="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Spacing="2">
+                            <TextBlock Text="Cash Flow Timeline Distribution" FontWeight="SemiBold" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Red: Outflows/Investments | Green: Inflows/Maturity" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <lvc:CartesianChart
+                            Grid.Row="1"
+                            Series="{x:Bind ViewModel.TimelineSeries, Mode=OneWay}"
+                            XAxes="{x:Bind ViewModel.TimelineXAxes, Mode=OneWay}"
+                            YAxes="{x:Bind ViewModel.TimelineYAxes, Mode=OneWay}" />
+                    </Grid>
+                </Border>
+
+                <!-- Chart 2: Net Cumulative Curve -->
+                <Border
+                    Grid.Column="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Height="380">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Width="Auto" />
+                            <RowDefinition Width="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Spacing="2">
+                            <TextBlock Text="Cumulative Investment &amp; Net Capital Curve" FontWeight="SemiBold" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Tracking capital accumulation towards final maturity value" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <lvc:CartesianChart
+                            Grid.Row="1"
+                            Series="{x:Bind ViewModel.CumulativeSeries, Mode=OneWay}"
+                            XAxes="{x:Bind ViewModel.CumulativeXAxes, Mode=OneWay}"
+                            YAxes="{x:Bind ViewModel.CumulativeYAxes, Mode=OneWay}" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

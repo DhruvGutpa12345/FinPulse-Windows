@@ -1,0 +1,129 @@
+name: Build, Package & Release FinPulse Windows
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Package Windows Applications (.exe, .msi, .msix)
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup MSBuild and Windows SDK Tools
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install WiX Toolset for .MSI Generation
+        run: |
+          dotnet tool install --global wix --version 4.0.5
+
+      - name: Run Financial Mathematics Unit Tests
+        run: |
+          dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal
+
+      - name: Publish WinUI 3 Application (.exe standalone)
+        run: |
+          dotnet publish src/FinPulse/FinPulse.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
+
+      - name: Generate Code Signing Certificate (GitHub Secret or Self-Signed Timestamped)
+        shell: powershell
+        run: |
+          if ("${{ secrets.CODE_SIGNING_PFX_BASE64 }}" -ne "") {
+            Write-Host "Using production Code Signing Certificate from repository secrets..."
+            [System.IO.File]::WriteAllBytes("cert.pfx", [System.Convert]::FromBase64String("${{ secrets.CODE_SIGNING_PFX_BASE64 }}"))
+            echo "PFX_PASS=${{ secrets.CODE_SIGNING_PASSWORD }}" >> $env:GITHUB_ENV
+          } else {
+            Write-Host "Creating self-signed Code Signing Certificate with RFC3161 Timestamping..."
+            $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=FinPulse Windows, O=FinPulse Open Source, C=US" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(5)
+            $pwd = ConvertTo-SecureString -String "FinPulsePass123!" -Force -AsPlainText
+            Export-PfxCertificate -Cert $cert -FilePath "cert.pfx" -Password $pwd
+            Export-Certificate -Cert $cert -FilePath "cert.cer"
+            echo "PFX_PASS=FinPulsePass123!" >> $env:GITHUB_ENV
+          }
+
+      - name: Sign Standalone Executable (.exe)
+        shell: powershell
+        run: |
+          $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | Select-Object -First 1).FullName
+          Write-Host "Signing executable using $signtool..."
+          & $signtool sign /f "cert.pfx" /p $env:PFX_PASS /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v "publish/win-x64/FinPulse.exe"
+
+      - name: Build MSI Installer Package
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path "dist" -Force
+          # Package via WiX or WiX MSI builder
+          wix extension add WixToolset.UI.wixext
+          wix build -arch x64 -o dist/FinPulse-Setup-x64.msi -ext WixToolset.UI.wixext packaging/msi/Product.wxs -b publish/win-x64
+
+      - name: Sign MSI Installer Package
+        shell: powershell
+        run: |
+          $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | Select-Object -First 1).FullName
+          if (Test-Path "dist/FinPulse-Setup-x64.msi") {
+            & $signtool sign /f "cert.pfx" /p $env:PFX_PASS /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v "dist/FinPulse-Setup-x64.msi"
+          }
+
+      - name: Create MSIX Package (.msix)
+        shell: powershell
+        run: |
+          $makeappx = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "makeappx.exe" | Select-Object -First 1).FullName
+          New-Item -ItemType Directory -Path "msix_staging" -Force
+          Copy-Item -Path "publish/win-x64/*" -Destination "msix_staging" -Recurse
+          Copy-Item -Path "packaging/msix/AppxManifest.xml" -Destination "msix_staging/AppxManifest.xml"
+          Copy-Item -Path "src/FinPulse/Assets" -Destination "msix_staging/Assets" -Recurse -Force
+          
+          & $makeappx pack /d "msix_staging" /p "dist/FinPulse-x64.msix" /o /v
+
+      - name: Sign MSIX Package
+        shell: powershell
+        run: |
+          $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | Select-Object -First 1).FullName
+          & $signtool sign /f "cert.pfx" /p $env:PFX_PASS /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v "dist/FinPulse-x64.msix"
+
+      - name: Package Standalone Portable (.zip with .exe)
+        shell: powershell
+        run: |
+          Compress-Archive -Path "publish/win-x64/*" -DestinationPath "dist/FinPulse-Portable-x64.zip" -Force
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FinPulse-Windows-Packages
+          path: |
+            dist/*
+            publish/win-x64/FinPulse.exe
+            cert.cer
+
+      - name: Create GitHub Release (On Tag or Main Push)
+        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/FinPulse-Setup-x64.msi
+            dist/FinPulse-x64.msix
+            dist/FinPulse-Portable-x64.zip
+            publish/win-x64/FinPulse.exe
+            cert.cer
+          tag_name: ${{ github.ref_name }}
+          name: FinPulse Windows ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
