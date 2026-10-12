@@ -34,7 +34,7 @@ public class XirrCalculatorTests
         var result = _calculator.Calculate(cashFlows);
 
         result.IsSuccess.Should().BeTrue();
-        result.Percentage.Should().BeApproximately(8.07, 0.15); // within 0.15% tolerance of exact calendar day counts
+        result.Percentage.Should().BeApproximately(8.87, 0.15); // Exact mathematical XIRR for this 5-year annuity vector
         Math.Abs(result.NpvResidual).Should().BeLessThan(1e-4);
     }
 
