@@ -36,11 +36,11 @@ jobs:
 
       - name: Run Financial Mathematics Unit Tests
         run: |
-          dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal
+          dotnet test tests/FinPulse.Tests/FinPulse.Tests.csproj --configuration Release --verbosity normal -p:Platform=x64
 
       - name: Publish WinUI 3 Application (.exe standalone)
         run: |
-          dotnet publish src/FinPulse/FinPulse.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
+          dotnet publish src/FinPulse/FinPulse.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:Platform=x64 -o publish/win-x64
 
       - name: Generate Code Signing Certificate (GitHub Secret or Self-Signed Timestamped)
         shell: powershell
@@ -69,7 +69,6 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Path "dist" -Force
-          # Package via WiX or WiX MSI builder
           wix extension add WixToolset.UI.wixext
           wix build -arch x64 -o dist/FinPulse-Setup-x64.msi -ext WixToolset.UI.wixext packaging/msi/Product.wxs -b publish/win-x64
 
@@ -112,18 +111,18 @@ jobs:
             publish/win-x64/FinPulse.exe
             cert.cer
 
-      - name: Create GitHub Release (On Tag or Main Push)
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.0
+          name: "FinPulse Windows v1.0.0"
           files: |
             dist/FinPulse-Setup-x64.msi
             dist/FinPulse-x64.msix
             dist/FinPulse-Portable-x64.zip
             publish/win-x64/FinPulse.exe
             cert.cer
-          tag_name: ${{ github.ref_name }}
-          name: FinPulse Windows ${{ github.ref_name }}
           draft: false
           prerelease: false
           generate_release_notes: true
