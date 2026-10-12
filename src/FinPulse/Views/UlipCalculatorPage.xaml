@@ -13,6 +13,7 @@
         <converters:CurrencyFormatterConverter x:Key="CurrencyConverter" />
         <converters:PercentageFormatterConverter x:Key="PercentageConverter" />
         <converters:FlowTypeToBrushConverter x:Key="FlowTypeBrushConverter" />
+        <converters:DecimalToDoubleConverter x:Key="DecimalToDoubleConverter" />
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -314,7 +315,7 @@
                                     <!-- Amount NumberBox -->
                                     <NumberBox
                                         Grid.Column="2"
-                                        Value="{x:Bind Amount, Mode=TwoWay}"
+                                        Value="{x:Bind Amount, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
                                         SpinButtonPlacementMode="Compact"
                                         SmallChange="10000"
                                         HorizontalAlignment="Stretch"

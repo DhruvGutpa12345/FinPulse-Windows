@@ -33,19 +33,19 @@ public partial class UlipCalculatorViewModel : ObservableObject
     private ISeries[] _timelineSeries = Array.Empty<ISeries>();
 
     [ObservableProperty]
-    private Axis[] _timelineXAxes = Array.Empty<Axis>();
+    private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _timelineXAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
     [ObservableProperty]
-    private Axis[] _timelineYAxes = Array.Empty<Axis>();
+    private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _timelineYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
     [ObservableProperty]
     private ISeries[] _cumulativeSeries = Array.Empty<ISeries>();
 
     [ObservableProperty]
-    private Axis[] _cumulativeXAxes = Array.Empty<Axis>();
+    private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _cumulativeXAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
     [ObservableProperty]
-    private Axis[] _cumulativeYAxes = Array.Empty<Axis>();
+    private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _cumulativeYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
     public UlipCalculatorViewModel(IXirrCalculator xirrCalculator, IExportService exportService)
     {
