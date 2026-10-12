@@ -9,10 +9,12 @@
     <MediaTemplate EmbedCab="yes" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="FinPulse Windows">
-        <Files Include="publish\win-x64\*" />
-      </Directory>
+      <Directory Id="INSTALLFOLDER" Name="FinPulse Windows" />
     </StandardDirectory>
+
+    <ComponentGroup Id="ProductFilesComponentGroup" Directory="INSTALLFOLDER">
+      <Files Include="publish\win-x64\**" />
+    </ComponentGroup>
 
     <StandardDirectory Id="ProgramMenuFolder">
       <Component Id="AppShortcutComponent" Guid="D2A681BF-B85E-4D23-96CD-9E11C4F98E12" Bitness="always64">
@@ -37,7 +39,7 @@
     </StandardDirectory>
 
     <Feature Id="MainFeature" Title="FinPulse Windows" Level="1">
-      <Files Include="publish\win-x64\*" />
+      <ComponentGroupRef Id="ProductFilesComponentGroup" />
       <ComponentRef Id="AppShortcutComponent" />
       <ComponentRef Id="AppDesktopShortcutComponent" />
     </Feature>
