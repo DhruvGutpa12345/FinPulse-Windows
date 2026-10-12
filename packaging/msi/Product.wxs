@@ -6,41 +6,40 @@
            Scope="perMachine">
     
     <MajorUpgrade AllowDowngrades="yes" />
-    
     <MediaTemplate EmbedCab="yes" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="FinPulse Windows">
-        <Component Id="MainExecutable" Guid="3E47A9D5-3E77-4467-A964-1A53EFDA6601" Bitness="always64">
-          <File Id="FinPulseExe" Source="publish\win-x64\FinPulse.exe" KeyPath="yes">
-            <Shortcut Id="FinPulseAppShortcut"
-                      Directory="ProgramMenuFolder"
-                      Name="FinPulse Windows"
-                      Description="FinPulse Windows Financial Suite"
-                      WorkingDirectory="INSTALLFOLDER"
-                      Icon="AppIcon.exe"
-                      IconIndex="0"
-                      Advertise="yes" />
-            <Shortcut Id="FinPulseDesktopShortcut"
-                      Directory="DesktopFolder"
-                      Name="FinPulse Windows"
-                      Description="FinPulse Windows Financial Suite"
-                      WorkingDirectory="INSTALLFOLDER"
-                      Icon="AppIcon.exe"
-                      IconIndex="0"
-                      Advertise="yes" />
-          </File>
-        </Component>
+        <Files Include="publish\win-x64\*" />
       </Directory>
     </StandardDirectory>
 
-    <StandardDirectory Id="ProgramMenuFolder" />
-    <StandardDirectory Id="DesktopFolder" />
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="AppShortcutComponent" Guid="D2A681BF-B85E-4D23-96CD-9E11C4F98E12" Bitness="always64">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="FinPulse Windows"
+                  Description="FinPulse Windows Financial Suite"
+                  Target="[INSTALLFOLDER]FinPulse.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\FinPulse" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
 
-    <Icon Id="AppIcon.exe" SourceFile="publish\win-x64\FinPulse.exe" />
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="AppDesktopShortcutComponent" Guid="F4B892CF-A71E-4122-8A4D-7E22D3E89F34" Bitness="always64">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="FinPulse Windows"
+                  Description="FinPulse Windows Financial Suite"
+                  Target="[INSTALLFOLDER]FinPulse.exe"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\FinPulse" Name="desktop_installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
 
     <Feature Id="MainFeature" Title="FinPulse Windows" Level="1">
-      <ComponentRef Id="MainExecutable" />
+      <Files Include="publish\win-x64\*" />
+      <ComponentRef Id="AppShortcutComponent" />
+      <ComponentRef Id="AppDesktopShortcutComponent" />
     </Feature>
   </Package>
 </Wix>
