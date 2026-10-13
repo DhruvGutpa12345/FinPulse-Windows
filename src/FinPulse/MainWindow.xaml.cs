@@ -18,10 +18,14 @@ public sealed partial class MainWindow : Window
         SetTitleBar(AppTitleBar);
 
         // Apply Windows 11 Mica Alt Material via modern WinUI 3 Window.SystemBackdrop
-        this.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
-
-        // Default navigation
-        ContentFrame.Navigate(typeof(UlipCalculatorPage));
+        try
+        {
+            if (MicaController.IsSupported())
+            {
+                this.SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
+            }
+        }
+        catch { }
     }
 
     private void OnNavViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

@@ -13,13 +13,22 @@ public partial class App : Application
 
     public App()
     {
-        this.InitializeComponent();
-
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection);
         Services = serviceCollection.BuildServiceProvider();
-
         ViewModelLocator.Initialize(Services);
+
+        this.UnhandledException += (sender, e) =>
+        {
+            try
+            {
+                string logPath = Path.Combine(Path.GetTempPath(), "FinPulse_Crash.log");
+                File.WriteAllText(logPath, $"[{DateTime.Now:O}] UnhandledException: {e.Message}\n{e.Exception}");
+            }
+            catch { }
+        };
+
+        this.InitializeComponent();
     }
 
     private static void ConfigureServices(IServiceCollection services)

@@ -12,27 +12,21 @@ namespace FinPulse.Common.Converters;
 /// </summary>
 public class FlowTypeToBrushConverter : IValueConverter
 {
-    private static readonly SolidColorBrush OutflowBrush = new(Color.FromArgb(255, 239, 68, 68));       // Crimson / Red #EF4444
-    private static readonly SolidColorBrush TopUpBrush = new(Color.FromArgb(255, 249, 115, 22));        // Amber / Orange #F97316
-    private static readonly SolidColorBrush WithdrawalBrush = new(Color.FromArgb(255, 14, 165, 233));   // Sky Blue #0EA5E9
-    private static readonly SolidColorBrush MaturityBrush = new(Color.FromArgb(255, 16, 185, 129));     // Emerald Green #10B981
-    private static readonly SolidColorBrush DefaultBrush = new(Color.FromArgb(255, 148, 163, 184));    // Slate Gray #94A3B8
-
     public object Convert(object value, Type targetType, object parameter, string language)
     {
         if (value is FlowType flowType)
         {
             return flowType switch
             {
-                FlowType.PremiumOutflow => OutflowBrush,
-                FlowType.TopUp => TopUpBrush,
-                FlowType.PartialWithdrawal => WithdrawalBrush,
-                FlowType.FinalMaturity => MaturityBrush,
-                _ => DefaultBrush
+                FlowType.PremiumOutflow => new SolidColorBrush(Color.FromArgb(255, 239, 68, 68)),
+                FlowType.TopUp => new SolidColorBrush(Color.FromArgb(255, 249, 115, 22)),
+                FlowType.PartialWithdrawal => new SolidColorBrush(Color.FromArgb(255, 14, 165, 233)),
+                FlowType.FinalMaturity => new SolidColorBrush(Color.FromArgb(255, 16, 185, 129)),
+                _ => new SolidColorBrush(Color.FromArgb(255, 148, 163, 184))
             };
         }
 
-        return DefaultBrush;
+        return new SolidColorBrush(Color.FromArgb(255, 148, 163, 184));
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

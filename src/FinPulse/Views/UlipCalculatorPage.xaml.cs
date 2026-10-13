@@ -12,8 +12,8 @@ public sealed partial class UlipCalculatorPage : Page
 
     public UlipCalculatorPage()
     {
-        this.InitializeComponent();
         ViewModel = ViewModelLocator.UlipCalculatorViewModel;
+        this.InitializeComponent();
     }
 
     private void OnCashFlowValueChanged(object sender, object e)
