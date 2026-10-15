@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinPulse.Services;
 using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
@@ -12,32 +13,77 @@ namespace FinPulse.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly ISettingsService _settingsService;
+    private bool _isInitializing = false;
 
     [ObservableProperty]
     private int _themeIndex;
 
+    partial void OnThemeIndexChanged(int value)
+    {
+        SaveAndApply();
+    }
+
     [ObservableProperty]
     private int _backdropIndex;
+
+    partial void OnBackdropIndexChanged(int value)
+    {
+        SaveAndApply();
+    }
 
     [ObservableProperty]
     private int _selectedCurrencyIndex;
 
+    partial void OnSelectedCurrencyIndexChanged(int value)
+    {
+        SaveAndApply();
+    }
+
     [ObservableProperty]
     private decimal _defaultReturnRate;
+
+    partial void OnDefaultReturnRateChanged(decimal value)
+    {
+        SaveAndApply();
+    }
 
     [ObservableProperty]
     private decimal _defaultLoanRate;
 
+    partial void OnDefaultLoanRateChanged(decimal value)
+    {
+        SaveAndApply();
+    }
+
     [ObservableProperty]
     private bool _autoSortCashFlows;
+
+    partial void OnAutoSortCashFlowsChanged(bool value)
+    {
+        SaveAndApply();
+    }
 
     [ObservableProperty]
     private bool _includeCsvHeaders;
 
+    partial void OnIncludeCsvHeadersChanged(bool value)
+    {
+        SaveAndApply();
+    }
+
+    [ObservableProperty]
+    private string _formattedSampleCurrency = string.Empty;
+
+    [ObservableProperty]
+    private string _activeThemeDescription = string.Empty;
+
+    [ObservableProperty]
+    private string _activeBackdropDescription = string.Empty;
+
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    public string AppVersion => "1.2.0";
+    public string AppVersion => "1.2.1";
     public string RuntimeInfo => ".NET 8.0 • Windows App SDK 1.6 • WinUI 3";
 
     private static readonly string[] CurrencyCodes = { "INR", "USD", "EUR", "GBP", "JPY" };
@@ -48,20 +94,36 @@ public partial class SettingsViewModel : ObservableObject
         LoadFromSettings();
     }
 
-    private void LoadFromSettings()
+    public void LoadFromSettings()
     {
-        var settings = _settingsService.CurrentSettings;
-        ThemeIndex = settings.ThemeIndex;
-        BackdropIndex = settings.BackdropIndex;
-        SelectedCurrencyIndex = Array.IndexOf(CurrencyCodes, settings.CurrencyCode) switch
+        _isInitializing = true;
+        try
         {
-            -1 => 0,
-            var idx => idx
-        };
-        DefaultReturnRate = settings.DefaultReturnRate;
-        DefaultLoanRate = settings.DefaultLoanRate;
-        AutoSortCashFlows = settings.AutoSortCashFlows;
-        IncludeCsvHeaders = settings.IncludeCsvHeaders;
+            var settings = _settingsService.CurrentSettings;
+            ThemeIndex = settings.ThemeIndex;
+            BackdropIndex = settings.BackdropIndex;
+            SelectedCurrencyIndex = Array.IndexOf(CurrencyCodes, settings.CurrencyCode) switch
+            {
+                -1 => 0,
+                var idx => idx
+            };
+            DefaultReturnRate = settings.DefaultReturnRate;
+            DefaultLoanRate = settings.DefaultLoanRate;
+            AutoSortCashFlows = settings.AutoSortCashFlows;
+            IncludeCsvHeaders = settings.IncludeCsvHeaders;
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
+
+        UpdateLivePreview();
+    }
+
+    private void SaveAndApply()
+    {
+        if (_isInitializing) return;
+        SaveSettings();
     }
 
     [RelayCommand]
@@ -82,8 +144,9 @@ public partial class SettingsViewModel : ObservableObject
 
         _settingsService.SaveSettings(settings);
         ApplyThemeAndBackdrop(ThemeIndex, BackdropIndex);
+        UpdateLivePreview();
 
-        StatusMessage = "Settings saved successfully!";
+        StatusMessage = "Settings applied and saved!";
     }
 
     [RelayCommand]
@@ -127,12 +190,31 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    public void UpdateLivePreview()
+    {
+        var culture = _settingsService.CurrentCulture;
+        FormattedSampleCurrency = (1250000m).ToString("C2", culture);
+        ActiveThemeDescription = ThemeIndex switch
+        {
+            1 => "Light Theme Active",
+            2 => "Dark Theme Active",
+            _ => "Windows Default Theme Active"
+        };
+        ActiveBackdropDescription = BackdropIndex switch
+        {
+            0 => "Mica Alt (Windows 11 Tabbed Material)",
+            1 => "Mica (Windows 11 Subtle Translucent)",
+            2 => "Desktop Acrylic (Glass Blur Effect)",
+            _ => "Solid Background (No Translucency)"
+        };
+    }
+
     public static void ApplyThemeAndBackdrop(int themeIndex, int backdropIndex)
     {
         var window = App.MainWindowInstance;
         if (window == null) return;
 
-        // Apply Theme to Window Content
+        // 1. Apply Theme to Window Content
         if (window.Content is FrameworkElement rootElement)
         {
             rootElement.RequestedTheme = themeIndex switch
@@ -143,9 +225,26 @@ public partial class SettingsViewModel : ObservableObject
             };
         }
 
-        // Apply System Backdrop
+        // 2. Update Title Bar Caption Button Colors
         try
         {
+            if (AppWindowTitleBar.IsCustomizationSupported() && window.AppWindow?.TitleBar != null)
+            {
+                var titleBar = window.AppWindow.TitleBar;
+                bool isDark = themeIndex == 2 || (themeIndex == 0 && Application.Current.RequestedTheme == ApplicationTheme.Dark);
+                var fg = isDark
+                    ? Windows.UI.Color.FromArgb(255, 255, 255, 255)
+                    : Windows.UI.Color.FromArgb(255, 0, 0, 0);
+                titleBar.ButtonForegroundColor = fg;
+                titleBar.ButtonHoverForegroundColor = fg;
+            }
+        }
+        catch { }
+
+        // 3. Apply System Backdrop Material
+        try
+        {
+            window.SystemBackdrop = null;
             window.SystemBackdrop = backdropIndex switch
             {
                 0 => MicaController.IsSupported() ? new MicaBackdrop { Kind = MicaKind.BaseAlt } : null,

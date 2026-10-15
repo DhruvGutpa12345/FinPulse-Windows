@@ -58,10 +58,18 @@ public partial class EmiCalculatorViewModel : ObservableObject
     [ObservableProperty]
     private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _amortizationYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
-    public EmiCalculatorViewModel(IEmiCalculator emiCalculator, IExportService exportService)
+    private readonly ISettingsService? _settingsService;
+
+    public EmiCalculatorViewModel(IEmiCalculator emiCalculator, IExportService exportService, ISettingsService? settingsService = null)
     {
         _emiCalculator = emiCalculator;
         _exportService = exportService;
+        _settingsService = settingsService;
+
+        if (_settingsService != null && _settingsService.CurrentSettings != null)
+        {
+            _annualInterestRate = _settingsService.CurrentSettings.DefaultLoanRate;
+        }
 
         Recalculate();
     }

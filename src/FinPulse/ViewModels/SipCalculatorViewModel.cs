@@ -52,10 +52,18 @@ public partial class SipCalculatorViewModel : ObservableObject
     [ObservableProperty]
     private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _trajectoryYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
-    public SipCalculatorViewModel(ISipCalculator sipCalculator, IExportService exportService)
+    private readonly ISettingsService? _settingsService;
+
+    public SipCalculatorViewModel(ISipCalculator sipCalculator, IExportService exportService, ISettingsService? settingsService = null)
     {
         _sipCalculator = sipCalculator;
         _exportService = exportService;
+        _settingsService = settingsService;
+
+        if (_settingsService != null && _settingsService.CurrentSettings != null)
+        {
+            _expectedAnnualReturn = _settingsService.CurrentSettings.DefaultReturnRate;
+        }
 
         Recalculate();
     }

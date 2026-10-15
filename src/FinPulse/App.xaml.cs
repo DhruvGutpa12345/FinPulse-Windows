@@ -52,7 +52,7 @@ public partial class App : Application
         services.AddTransient<SipCalculatorViewModel>();
         services.AddTransient<EmiCalculatorViewModel>();
         services.AddTransient<CagrCalculatorViewModel>();
-        services.AddTransient<SettingsViewModel>();
+        services.AddSingleton<SettingsViewModel>();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)

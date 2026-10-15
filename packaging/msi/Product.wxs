@@ -1,7 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="FinPulse Windows"
            Manufacturer="Dhruv Gupta"
-           Version="1.2.0"
+           Version="1.2.1"
            UpgradeCode="E3A74A3D-5D9E-40F6-96D2-4B283A499701"
            Scope="perMachine">
     

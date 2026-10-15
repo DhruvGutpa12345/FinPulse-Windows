@@ -47,10 +47,13 @@ public partial class UlipCalculatorViewModel : ObservableObject
     [ObservableProperty]
     private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _cumulativeYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
-    public UlipCalculatorViewModel(IXirrCalculator xirrCalculator, IExportService exportService)
+    private readonly ISettingsService? _settingsService;
+
+    public UlipCalculatorViewModel(IXirrCalculator xirrCalculator, IExportService exportService, ISettingsService? settingsService = null)
     {
         _xirrCalculator = xirrCalculator;
         _exportService = exportService;
+        _settingsService = settingsService;
 
         LoadDefaultSampleData();
         Recalculate();
@@ -145,7 +148,13 @@ public partial class UlipCalculatorViewModel : ObservableObject
     {
         try
         {
-            Summary = _xirrCalculator.CalculateSummary(CashFlows);
+            IEnumerable<CashFlowItem> items = CashFlows;
+            if (_settingsService?.CurrentSettings.AutoSortCashFlows == true && CashFlows.Count > 1)
+            {
+                items = CashFlows.OrderBy(x => x.Date).ToList();
+            }
+
+            Summary = _xirrCalculator.CalculateSummary(items);
             HasError = !Summary.IsConverged && CashFlows.Count >= 2;
             StatusMessage = Summary.IsConverged
                 ? $"XIRR calculated successfully via {Summary.ConvergenceMethod}."

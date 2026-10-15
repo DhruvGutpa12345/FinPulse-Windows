@@ -82,5 +82,14 @@ public class SettingsService : ISettingsService
             "JPY" => CultureInfo.GetCultureInfo("ja-JP"),
             _ => CultureInfo.GetCultureInfo("en-IN")
         };
+
+        try
+        {
+            CultureInfo.DefaultThreadCurrentCulture = SharedCurrentCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = SharedCurrentCulture;
+            Thread.CurrentThread.CurrentCulture = SharedCurrentCulture;
+            Thread.CurrentThread.CurrentUICulture = SharedCurrentCulture;
+        }
+        catch { }
     }
 }

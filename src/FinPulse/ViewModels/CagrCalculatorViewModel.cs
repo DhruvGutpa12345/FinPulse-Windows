@@ -69,10 +69,18 @@ public partial class CagrCalculatorViewModel : ObservableObject
     [ObservableProperty]
     private LiveChartsCore.Kernel.Sketches.ICartesianAxis[] _trajectoryYAxes = Array.Empty<LiveChartsCore.Kernel.Sketches.ICartesianAxis>();
 
-    public CagrCalculatorViewModel(ICagrCalculator cagrCalculator, IExportService exportService)
+    private readonly ISettingsService? _settingsService;
+
+    public CagrCalculatorViewModel(ICagrCalculator cagrCalculator, IExportService exportService, ISettingsService? settingsService = null)
     {
         _cagrCalculator = cagrCalculator;
         _exportService = exportService;
+        _settingsService = settingsService;
+
+        if (_settingsService != null && _settingsService.CurrentSettings != null)
+        {
+            _annualRatePercent = _settingsService.CurrentSettings.DefaultReturnRate;
+        }
 
         Recalculate();
     }
