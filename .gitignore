@@ -55,6 +55,8 @@ project.assets.json
 *.p12
 *.snk
 *.key
+!packaging/signing/FinPulseDevCert.pfx
+!packaging/signing/FinPulseDevCert.cer
 
 # OS Generated
 Thumbs.db

@@ -46,7 +46,7 @@ jobs:
         run: |
           msbuild src\FinPulse\FinPulse.csproj /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:PublishDir=..\..\publish\win-x64\ /t:Publish /v:detailed
 
-      - name: Generate Code Signing Certificate (GitHub Secret or Self-Signed Timestamped)
+      - name: Setup Code Signing Certificate
         shell: powershell
         run: |
           if ("${{ secrets.CODE_SIGNING_PFX_BASE64 }}" -ne "") {
@@ -54,11 +54,9 @@ jobs:
             [System.IO.File]::WriteAllBytes("cert.pfx", [System.Convert]::FromBase64String("${{ secrets.CODE_SIGNING_PFX_BASE64 }}"))
             echo "PFX_PASS=${{ secrets.CODE_SIGNING_PASSWORD }}" >> $env:GITHUB_ENV
           } else {
-            Write-Host "Creating self-signed Code Signing Certificate with RFC3161 Timestamping..."
-            $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=FinPulse Windows, O=FinPulse Open Source, C=US" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(5)
-            $pwd = ConvertTo-SecureString -String "FinPulsePass123!" -Force -AsPlainText
-            Export-PfxCertificate -Cert $cert -FilePath "cert.pfx" -Password $pwd
-            Export-Certificate -Cert $cert -FilePath "cert.cer"
+            Write-Host "Using repository static development certificate (FinPulseDevCert.pfx)..."
+            Copy-Item -Path "packaging/signing/FinPulseDevCert.pfx" -Destination "cert.pfx"
+            Copy-Item -Path "packaging/signing/FinPulseDevCert.cer" -Destination "cert.cer"
             echo "PFX_PASS=FinPulsePass123!" >> $env:GITHUB_ENV
           }
 
@@ -105,13 +103,20 @@ jobs:
         run: |
           Compress-Archive -Path "publish/win-x64/*" -DestinationPath "dist/FinPulse-Portable-x64.zip" -Force
 
+      - name: Build Standalone Launcher (.exe) and Copy Distribution Scripts
+        shell: powershell
+        run: |
+          $csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          & $csc /target:winexe /r:System.Windows.Forms.dll /out:dist/FinPulse.exe packaging/launcher/Launcher.cs
+          Copy-Item -Path "cert.cer" -Destination "dist/cert.cer" -Force
+          Copy-Item -Path "packaging/signing/FinPulseDevCert.cer" -Destination "dist/FinPulseDevCert.cer" -Force
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: FinPulse-Windows-Packages
           path: |
             dist/*
-            publish/win-x64/FinPulse.exe
             cert.cer
 
       - name: Create GitHub Release
@@ -124,8 +129,11 @@ jobs:
             dist/FinPulse-Setup-x64.msi
             dist/FinPulse-x64.msix
             dist/FinPulse-Portable-x64.zip
-            publish/win-x64/FinPulse.exe
-            cert.cer
+            dist/FinPulse.exe
+            dist/Install-RunAsAdmin.bat
+            dist/Install-All.ps1
+            dist/cert.cer
+            dist/FinPulseDevCert.cer
           draft: false
           prerelease: false
           generate_release_notes: true
