@@ -29,6 +29,12 @@ public sealed partial class MainWindow : Window
 
     private void OnNavViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
+        if (args.IsSettingsSelected)
+        {
+            ContentFrame.Navigate(typeof(SettingsPage));
+            return;
+        }
+
         if (args.SelectedItemContainer is NavigationViewItem selectedItem)
         {
             string tag = selectedItem.Tag?.ToString() ?? "Ulip";

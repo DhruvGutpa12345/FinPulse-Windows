@@ -32,7 +32,7 @@
                     Padding="6,2"
                     VerticalAlignment="Center">
                     <TextBlock
-                        Text="v1.0 • XIRR Engine"
+                        Text="v1.2 • Financial Suite"
                         FontSize="11"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </Border>

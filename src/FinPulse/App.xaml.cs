@@ -11,6 +11,8 @@ public partial class App : Application
 {
     private Window? _mainWindow;
 
+    public static MainWindow? MainWindowInstance { get; private set; }
+
     public static IServiceProvider Services { get; private set; } = null!;
 
     public App()
@@ -42,6 +44,7 @@ public partial class App : Application
         services.AddSingleton<IEmiCalculator, EmiCalculator>();
         services.AddSingleton<ICagrCalculator, CagrCalculator>();
         services.AddSingleton<IExportService, WindowsExportService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
@@ -49,11 +52,23 @@ public partial class App : Application
         services.AddTransient<SipCalculatorViewModel>();
         services.AddTransient<EmiCalculatorViewModel>();
         services.AddTransient<CagrCalculatorViewModel>();
+        services.AddTransient<SettingsViewModel>();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _mainWindow = new MainWindow();
-        _mainWindow.Activate();
+        var window = new MainWindow();
+        _mainWindow = window;
+        MainWindowInstance = window;
+        window.Activate();
+
+        // Apply saved theme and backdrop preferences
+        var settingsService = Services.GetService<ISettingsService>();
+        if (settingsService != null)
+        {
+            SettingsViewModel.ApplyThemeAndBackdrop(
+                settingsService.CurrentSettings.ThemeIndex,
+                settingsService.CurrentSettings.BackdropIndex);
+        }
     }
 }

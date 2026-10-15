@@ -30,4 +30,8 @@ public static class ViewModelLocator
     public static CagrCalculatorViewModel CagrCalculatorViewModel =>
         _serviceProvider?.GetRequiredService<CagrCalculatorViewModel>()
         ?? throw new InvalidOperationException("ServiceProvider not initialized.");
+
+    public static SettingsViewModel SettingsViewModel =>
+        _serviceProvider?.GetRequiredService<SettingsViewModel>()
+        ?? throw new InvalidOperationException("ServiceProvider not initialized.");
 }
