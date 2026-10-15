@@ -6,16 +6,16 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="FinPulse.Windows"
-    Publisher="CN=FinPulse Windows, O=FinPulse Open Source, C=US"
-    Version="1.2.1.0"
+    Name="DhruvGupta.FinPulse-XIRRCalculator"
+    Publisher="CN=CB32F928-2859-4967-B8F7-396A9964D1FB"
+    Version="1.2.2.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>FinPulse Windows</DisplayName>
+    <DisplayName>FinPulse - XIRR Calculator</DisplayName>
     <PublisherDisplayName>Dhruv Gupta</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <Description>Modern, native Windows financial desktop calculator built with WinUI 3, Windows App SDK, and .NET 8.</Description>
+    <Description>Modern, native Windows financial desktop calculator suite built with WinUI 3, Windows App SDK, and .NET 8.</Description>
   </Properties>
 
   <Dependencies>
@@ -31,8 +31,8 @@
       Executable="FinPulse.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="FinPulse Windows"
-        Description="FinPulse Windows Financial Suite"
+        DisplayName="FinPulse - XIRR Calculator"
+        Description="FinPulse - XIRR Calculator Financial Suite"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
