@@ -18,4 +18,16 @@ public static class ViewModelLocator
     public static UlipCalculatorViewModel UlipCalculatorViewModel =>
         _serviceProvider?.GetRequiredService<UlipCalculatorViewModel>()
         ?? throw new InvalidOperationException("ServiceProvider not initialized.");
+
+    public static SipCalculatorViewModel SipCalculatorViewModel =>
+        _serviceProvider?.GetRequiredService<SipCalculatorViewModel>()
+        ?? throw new InvalidOperationException("ServiceProvider not initialized.");
+
+    public static EmiCalculatorViewModel EmiCalculatorViewModel =>
+        _serviceProvider?.GetRequiredService<EmiCalculatorViewModel>()
+        ?? throw new InvalidOperationException("ServiceProvider not initialized.");
+
+    public static CagrCalculatorViewModel CagrCalculatorViewModel =>
+        _serviceProvider?.GetRequiredService<CagrCalculatorViewModel>()
+        ?? throw new InvalidOperationException("ServiceProvider not initialized.");
 }

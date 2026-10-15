@@ -1,0 +1,424 @@
+<Page
+    x:Class="FinPulse.Views.SipCalculatorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:models="using:FinPulse.Core.Models"
+    xmlns:converters="using:FinPulse.Common.Converters"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <converters:CurrencyFormatterConverter x:Key="CurrencyConverter" />
+        <converters:PercentageFormatterConverter x:Key="PercentageConverter" />
+        <converters:DecimalToDoubleConverter x:Key="DecimalToDoubleConverter" />
+        <converters:IntToDoubleConverter x:Key="IntToDoubleConverter" />
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="24" Padding="24,16,24,32" MaxWidth="1400">
+
+            <!-- PAGE HEADER & ACTION TOOLBAR -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock
+                        Text="SIP (Systematic Investment Plan) Wealth Planner"
+                        Style="{ThemeResource TitleTextBlockStyle}"
+                        FontWeight="SemiBold" />
+                    <TextBlock
+                        Text="Simulate wealth compounding with regular monthly disciplined investing, annual step-up increments, and asset growth projections."
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+
+                <!-- Action Toolbar -->
+                <CommandBar
+                    Grid.Column="1"
+                    DefaultLabelPosition="Right"
+                    Background="Transparent"
+                    IsOpen="False">
+                    <AppBarButton
+                        Icon="Copy"
+                        Label="Copy Summary"
+                        ToolTipService.ToolTip="Copy summary KPIs to clipboard"
+                        Command="{x:Bind ViewModel.CopySummaryCommand}" />
+                    <AppBarButton
+                        Icon="Share"
+                        Label="Export CSV"
+                        ToolTipService.ToolTip="Export yearly schedule to CSV"
+                        Command="{x:Bind ViewModel.ExportCsvCommand}" />
+                </CommandBar>
+            </Grid>
+
+            <!-- KPI SUMMARY METRIC CARDS -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Invested Card -->
+                <Border
+                    Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8D8;" FontSize="14" Foreground="#3B82F6" />
+                            <TextBlock
+                                Text="TOTAL INVESTED"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Result.TotalInvested, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold" />
+                        <TextBlock
+                            Text="Principal capital committed"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Estimated Wealth Gain Card -->
+                <Border
+                    Grid.Column="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8B9;" FontSize="14" Foreground="#10B981" />
+                            <TextBlock
+                                Text="ESTIMATED GAIN"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Result.TotalGain, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold"
+                            Foreground="#10B981" />
+                        <TextBlock
+                            Text="Compound interest generated"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Future Value Card -->
+                <Border
+                    Grid.Column="2"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE9D9;" FontSize="14" Foreground="#8B5CF6" />
+                            <TextBlock
+                                Text="TOTAL MATURITY VALUE"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Result.FutureValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                            Style="{ThemeResource TitleTextBlockStyle}"
+                            FontWeight="Bold" />
+                        <TextBlock
+                            Text="Accumulated target corpus"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Wealth Multiplier Card -->
+                <Border
+                    Grid.Column="3"
+                    Background="{ThemeResource LayerFillColorAltBrush}"
+                    BorderBrush="{ThemeResource SystemAccentColor}"
+                    BorderThickness="1.5"
+                    CornerRadius="8"
+                    Padding="18,14">
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE9F9;" FontSize="14" Foreground="{ThemeResource SystemAccentColor}" />
+                            <TextBlock
+                                Text="WEALTH MULTIPLIER"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontWeight="SemiBold" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Result.WealthMultiplier, Mode=OneWay}"
+                                Style="{ThemeResource TitleTextBlockStyle}"
+                                FontWeight="Bold"
+                                Foreground="{ThemeResource SystemAccentColor}" />
+                            <TextBlock
+                                Text="x initial capital"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,4"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="Capital growth factor"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- INPUT CONTROLS & CHARTS ROW -->
+            <Grid ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="420" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT: Interactive Inputs Card -->
+                <Border
+                    Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Investment Parameters" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+                        <!-- Monthly Investment Amount -->
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <TextBlock Text="Monthly Investment Amount" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.MonthlyInvestment, Mode=OneWay, Converter={StaticResource CurrencyConverter}}"
+                                    HorizontalAlignment="Right"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <NumberBox
+                                Value="{x:Bind ViewModel.MonthlyInvestment, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                SpinButtonPlacementMode="Compact"
+                                SmallChange="1000"
+                                LargeChange="5000"
+                                ValueChanged="OnInputValueChanged" />
+                            <Slider
+                                Minimum="500"
+                                Maximum="100000"
+                                StepFrequency="500"
+                                Value="{x:Bind ViewModel.MonthlyInvestment, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                ValueChanged="OnSliderValueChanged" />
+                        </StackPanel>
+
+                        <!-- Expected Annual Return Rate -->
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <TextBlock Text="Expected Return Rate (p.a.)" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.ExpectedAnnualReturn, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
+                                    HorizontalAlignment="Right"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <NumberBox
+                                Value="{x:Bind ViewModel.ExpectedAnnualReturn, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                SpinButtonPlacementMode="Compact"
+                                SmallChange="0.5"
+                                ValueChanged="OnInputValueChanged" />
+                            <Slider
+                                Minimum="1"
+                                Maximum="30"
+                                StepFrequency="0.5"
+                                Value="{x:Bind ViewModel.ExpectedAnnualReturn, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                ValueChanged="OnSliderValueChanged" />
+                        </StackPanel>
+
+                        <!-- Investment Tenure (Years) -->
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <TextBlock Text="Investment Horizon (Years)" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.TenureYears, Mode=OneWay}"
+                                    HorizontalAlignment="Right"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <NumberBox
+                                Value="{x:Bind ViewModel.TenureYears, Mode=TwoWay, Converter={StaticResource IntToDoubleConverter}}"
+                                SpinButtonPlacementMode="Compact"
+                                SmallChange="1"
+                                ValueChanged="OnInputValueChanged" />
+                            <Slider
+                                Minimum="1"
+                                Maximum="40"
+                                StepFrequency="1"
+                                Value="{x:Bind ViewModel.TenureYears, Mode=TwoWay, Converter={StaticResource IntToDoubleConverter}}"
+                                ValueChanged="OnSliderValueChanged" />
+
+                            <!-- Quick Tenure Presets -->
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                <Button Content="5Y" Click="OnPreset5Years" Style="{ThemeResource AccentButtonStyle}" Padding="12,4" />
+                                <Button Content="10Y" Click="OnPreset10Years" Padding="12,4" />
+                                <Button Content="15Y" Click="OnPreset15Years" Padding="12,4" />
+                                <Button Content="20Y" Click="OnPreset20Years" Padding="12,4" />
+                                <Button Content="25Y" Click="OnPreset25Years" Padding="12,4" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Annual Step-Up (%) -->
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <TextBlock Text="Annual Step-Up (% / year)" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.AnnualStepUpPercent, Mode=OneWay, Converter={StaticResource PercentageConverter}}"
+                                    HorizontalAlignment="Right"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    FontWeight="SemiBold" />
+                            </Grid>
+                            <NumberBox
+                                Value="{x:Bind ViewModel.AnnualStepUpPercent, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                SpinButtonPlacementMode="Compact"
+                                SmallChange="1"
+                                ValueChanged="OnInputValueChanged" />
+                            <Slider
+                                Minimum="0"
+                                Maximum="25"
+                                StepFrequency="1"
+                                Value="{x:Bind ViewModel.AnnualStepUpPercent, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                                ValueChanged="OnSliderValueChanged" />
+                            <TextBlock
+                                Text="Increase SIP amount annually in line with salary growth"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- RIGHT: Charts Column -->
+                <Grid Grid.Column="1" RowSpacing="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="260" />
+                        <RowDefinition Height="280" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Chart 1: Doughnut Breakdown -->
+                    <Border
+                        Grid.Row="0"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Investment vs Wealth Gain Breakdown" FontWeight="SemiBold" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                            <lvc:PieChart
+                                Grid.Row="1"
+                                Series="{x:Bind ViewModel.PieSeries, Mode=OneWay}"
+                                LegendPosition="Right" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Chart 2: Trajectory Line/Bar Chart -->
+                    <Border
+                        Grid.Row="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Wealth Accumulation Trajectory Over Time" FontWeight="SemiBold" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+                            <lvc:CartesianChart
+                                Grid.Row="1"
+                                Series="{x:Bind ViewModel.TrajectorySeries, Mode=OneWay}"
+                                XAxes="{x:Bind ViewModel.TrajectoryXAxes, Mode=OneWay}"
+                                YAxes="{x:Bind ViewModel.TrajectoryYAxes, Mode=OneWay}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- YEARLY BREAKDOWN SCHEDULE TABLE -->
+            <Border
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Year-by-Year Growth Schedule" FontWeight="SemiBold" Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+                    <!-- Schedule Header -->
+                    <Grid Padding="12,8" Background="{ThemeResource LayerFillColorAltBrush}" CornerRadius="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="YEAR" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="1" Text="YEARLY INVESTED" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="2" Text="TOTAL INVESTED" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="3" Text="FUTURE VALUE" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                        <TextBlock Grid.Column="4" Text="WEALTH GAIN" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}" />
+                    </Grid>
+
+                    <!-- Schedule List -->
+                    <ListView
+                        ItemsSource="{x:Bind ViewModel.Schedule, Mode=OneWay}"
+                        SelectionMode="None"
+                        MaxHeight="360">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:SipYearBreakdown">
+                                <Grid Padding="12,10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{x:Bind Year, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind YearlyInvestment, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind CumulativeInvested, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="{x:Bind FutureValue, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Text="{x:Bind WealthGain, Mode=OneWay, Converter={StaticResource CurrencyConverter}}" Foreground="#10B981" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,3 +1,5 @@
+using System.IO;
+using FinPulse.Core.Services;
 using FinPulse.Services;
 using FinPulse.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,7 @@ public partial class App : Application
                 File.WriteAllText(logPath, $"[{DateTime.Now:O}] UnhandledException: {e.Message}\n{e.Exception}");
             }
             catch { }
+            e.Handled = true;
         };
 
         this.InitializeComponent();
@@ -35,11 +38,17 @@ public partial class App : Application
     {
         // Core Mathematical & Infrastructure Services
         services.AddSingleton<IXirrCalculator, XirrCalculator>();
+        services.AddSingleton<ISipCalculator, SipCalculator>();
+        services.AddSingleton<IEmiCalculator, EmiCalculator>();
+        services.AddSingleton<ICagrCalculator, CagrCalculator>();
         services.AddSingleton<IExportService, WindowsExportService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddTransient<UlipCalculatorViewModel>();
+        services.AddTransient<SipCalculatorViewModel>();
+        services.AddTransient<EmiCalculatorViewModel>();
+        services.AddTransient<CagrCalculatorViewModel>();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
