@@ -107,7 +107,11 @@ jobs:
         shell: powershell
         run: |
           $csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-          & $csc /target:winexe /r:System.Windows.Forms.dll /out:dist/FinPulse.exe packaging/launcher/Launcher.cs
+          $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | Where-Object { $_.FullName -like "*\x64\*" } | Select-Object -First 1).FullName
+          & $csc /target:winexe /r:System.Windows.Forms.dll "/out:dist\FinPulse.exe" "packaging\launcher\Launcher.cs"
+          & $signtool sign /f "cert.pfx" /p $env:PFX_PASS /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v "dist\FinPulse.exe"
+          Copy-Item -Path "packaging/scripts/Install-RunAsAdmin.bat" -Destination "dist/Install-RunAsAdmin.bat" -Force
+          Copy-Item -Path "packaging/scripts/Install-All.ps1" -Destination "dist/Install-All.ps1" -Force
           Copy-Item -Path "cert.cer" -Destination "dist/cert.cer" -Force
           Copy-Item -Path "packaging/signing/FinPulseDevCert.cer" -Destination "dist/FinPulseDevCert.cer" -Force
 
