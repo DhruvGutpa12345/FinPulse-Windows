@@ -4,6 +4,7 @@ obj/
 artifacts/
 publish/
 dist/
+msix_staging/
 TestResults/
 
 # User-specific files

@@ -382,7 +382,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                     <TextBlock Text="FinPulse Windows" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold" />
                                     <Border Background="{ThemeResource SystemAccentColor}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                        <TextBlock Text="v1.2.2" Foreground="White" FontWeight="SemiBold" FontSize="11" />
+                                        <TextBlock Text="v1.2.3" Foreground="White" FontWeight="SemiBold" FontSize="11" />
                                     </Border>
                                 </StackPanel>
                                 <TextBlock Text="Open-source native financial desktop calculator suite engineered for Windows 11." Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

@@ -8,7 +8,7 @@
   <Identity
     Name="DhruvGupta.FinPulse-XIRRCalculator"
     Publisher="CN=CB32F928-2859-4967-B8F7-396A9964D1FB"
-    Version="1.2.2.0"
+    Version="1.2.3.0"
     ProcessorArchitecture="x64" />
 
   <Properties>

@@ -83,7 +83,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    public string AppVersion => "1.2.2";
+    public string AppVersion => "1.2.3";
     public string RuntimeInfo => ".NET 8.0 • Windows App SDK 1.6 • WinUI 3";
 
     private static readonly string[] CurrencyCodes = { "INR", "USD", "EUR", "GBP", "JPY" };
