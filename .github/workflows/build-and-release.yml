@@ -89,6 +89,7 @@ jobs:
           Copy-Item -Path "publish/win-x64/*" -Destination "msix_staging" -Recurse
           Copy-Item -Path "packaging/msix/AppxManifest.xml" -Destination "msix_staging/AppxManifest.xml"
           Copy-Item -Path "src/FinPulse/Assets/*" -Destination "msix_staging/Assets" -Recurse -Force
+          Get-ChildItem -Path "msix_staging" -Filter "*.pdb" -Recurse | Remove-Item -Force
           
           & $makeappx pack /d "msix_staging" /p "dist/FinPulse-x64.msix" /o /v
 

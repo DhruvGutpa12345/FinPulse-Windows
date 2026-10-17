@@ -15,6 +15,9 @@ Copy-Item -Path "publish\win-x64\*" -Destination "msix_staging" -Recurse -Force
 Copy-Item -Path "packaging\msix\AppxManifest.xml" -Destination "msix_staging\AppxManifest.xml" -Force
 Copy-Item -Path "src\FinPulse\Assets\*" -Destination "msix_staging\Assets" -Recurse -Force
 
+Write-Host "Stripping debug symbol (.pdb) files from package payload..."
+Get-ChildItem -Path "msix_staging" -Filter "*.pdb" -Recurse | Remove-Item -Force
+
 if (-not (Test-Path "dist")) {
     New-Item -ItemType Directory -Path "dist" -Force | Out-Null
 }
